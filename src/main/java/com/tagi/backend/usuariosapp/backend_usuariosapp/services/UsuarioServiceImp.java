@@ -9,7 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tagi.backend.usuariosapp.backend_usuariosapp.entities.Usuario;
+import com.tagi.backend.usuariosapp.backend_usuariosapp.models.entities.Usuario;
+import com.tagi.backend.usuariosapp.backend_usuariosapp.models.request.UsuarioRequest;
 import com.tagi.backend.usuariosapp.backend_usuariosapp.repositories.UsuarioRepository;
 
 @Service
@@ -44,7 +45,7 @@ public class UsuarioServiceImp implements UsuarioService {
 
     @Override
     @Transactional
-    public Optional<Usuario> update(Usuario usuario, Long id) {
+    public Optional<Usuario> update(UsuarioRequest usuario, Long id) {
         Optional<Usuario> usuarioOptional = findById(id);
         Usuario user = null;
         if (usuarioOptional.isPresent()) {

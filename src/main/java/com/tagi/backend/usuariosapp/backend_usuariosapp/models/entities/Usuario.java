@@ -1,4 +1,4 @@
-package com.tagi.backend.usuariosapp.backend_usuariosapp.entities;
+package com.tagi.backend.usuariosapp.backend_usuariosapp.models.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -6,6 +6,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "usuarios")
@@ -16,11 +20,17 @@ public class Usuario {
     private Long id;
 
     @Column(unique = true)
+    @Size(min = 3, max = 10)
+    @NotBlank
     private String usuario;
 
+    @NotBlank
+    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$")
     private String pass;
 
     @Column(unique = true)
+    @NotBlank
+    @Email
     private String correo;
 
     public Long getId() {
