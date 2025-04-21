@@ -1,0 +1,6 @@
+{"properties": [{
+  "name": "auth.codigo_secreto",
+  "type": "java.lang.String",
+  "description": "Variable codigo codigo_secreto para la autenticacion",
+  "default": "codigo_secretote"
+}]}

@@ -2,6 +2,7 @@ package com.tagi.backend.usuariosapp.backend_usuariosapp.auth.filtro;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,12 +16,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.tagi.backend.usuariosapp.backend_usuariosapp.models.entities.Usuario;
 
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import static com.tagi.backend.usuariosapp.backend_usuariosapp.auth.TokenJwtConfig.*;
 
 public class JwtFiltroAutenticacion extends UsernamePasswordAuthenticationFilter {
 
@@ -29,8 +34,10 @@ public class JwtFiltroAutenticacion extends UsernamePasswordAuthenticationFilter
     // y establecer la autenticación en el contexto de seguridad de Spring Security.
 
     private AuthenticationManager authenticationManager;
+    private final String codigoSecreto;
     
-    public JwtFiltroAutenticacion(AuthenticationManager authenticationManager) {
+    public JwtFiltroAutenticacion(AuthenticationManager authenticationManager, String codigoSecreto) {
+        this.codigoSecreto = codigoSecreto;
         this.authenticationManager = authenticationManager;
     }
     
@@ -46,18 +53,14 @@ public class JwtFiltroAutenticacion extends UsernamePasswordAuthenticationFilter
             username = usuario.getUsuario();
             password = usuario.getPass();
 
-            logger.info("Usuario: " + username + ", Pass: " + password);
+            logger.debug("Usuario: " + username + ", Pass: " + password);
         } catch (StreamReadException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (DatabindException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO: handle exception
             e.printStackTrace();
         }catch (Exception e) {
-            // TODO: handle exception
             e.printStackTrace();
         }
 
@@ -68,13 +71,20 @@ public class JwtFiltroAutenticacion extends UsernamePasswordAuthenticationFilter
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
             Authentication authResult) throws IOException, ServletException {
+
         String usuario = ((User) authResult.getPrincipal()).getUsername();
-        String ficha = ("codigo_secreto." + usuario);
-        String token = Base64.getEncoder().encodeToString(ficha.getBytes()); // Aquí deberías generar un token JWT real
+        // String ficha = (codigoSecreto + ":" + usuario);
+        // String token = Base64.getEncoder().encodeToString(ficha.getBytes()); // Aquí deberías generar un token JWT real
+        String token = Jwts.builder()
+                .subject(usuario)
+                .signWith(CLAVE_SECRETA)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + 86400000)) // 1 día de expiración
+                .compact();
 
-        response.addHeader("Authorization", "Bearer " + token);
+        response.addHeader(HEADER, PREFIJO_TOKEN + token);
 
-        Map<String, Object> body = HashMap<>();
+        Map<String, Object> body = new HashMap<>();
         body.put("usuario", usuario);
         body.put("token", token);
         body.put("mensaje", "Autenticación exitosa");
@@ -87,7 +97,7 @@ public class JwtFiltroAutenticacion extends UsernamePasswordAuthenticationFilter
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException failed) throws IOException, ServletException {
-        Map<String, Object> body = HashMap<>();
+        Map<String, Object> body = new HashMap<>();
         body.put("mensaje", "Error de autenticación");
         body.put("error", failed.getMessage());
 

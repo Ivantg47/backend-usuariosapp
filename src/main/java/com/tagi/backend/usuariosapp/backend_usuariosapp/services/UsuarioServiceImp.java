@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +17,9 @@ public class UsuarioServiceImp implements UsuarioService {
 
     @Autowired
     private UsuarioRepository repository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true)
@@ -34,6 +36,7 @@ public class UsuarioServiceImp implements UsuarioService {
     @Override
     @Transactional
     public Usuario save(Usuario usuario) {
+        usuario.setPass(passwordEncoder.encode(usuario.getPass()));
         return repository.save(usuario);
     }
 
