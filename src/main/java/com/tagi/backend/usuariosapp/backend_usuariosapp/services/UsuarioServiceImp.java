@@ -3,12 +3,15 @@ package com.tagi.backend.usuariosapp.backend_usuariosapp.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tagi.backend.usuariosapp.backend_usuariosapp.models.dto.UsuarioDto;
+import com.tagi.backend.usuariosapp.backend_usuariosapp.models.dto.mapper.DtoMapperUsuario;
 import com.tagi.backend.usuariosapp.backend_usuariosapp.models.entities.Role;
 import com.tagi.backend.usuariosapp.backend_usuariosapp.models.entities.Usuario;
 import com.tagi.backend.usuariosapp.backend_usuariosapp.models.request.UsuarioRequest;
@@ -29,19 +32,27 @@ public class UsuarioServiceImp implements UsuarioService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Usuario> findAll() {
-        return (List<Usuario>) repository.findAll();
+    public List<UsuarioDto> findAll() {
+        List<Usuario> usuarios = (List<Usuario>) repository.findAll();
+
+        return usuarios.stream()
+            .map(usuario -> DtoMapperUsuario.getInstance()
+                .setUsuario(usuario)
+                .build())
+            .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Usuario> findById(Long id) {
-        return repository.findById(id);
+    public Optional<UsuarioDto> findById(Long id) {
+        return repository.findById(id).map(usuario -> DtoMapperUsuario.getInstance()
+            .setUsuario(usuario)
+            .build());
     }
 
     @Override
     @Transactional
-    public Usuario save(Usuario usuario) {
+    public UsuarioDto save(Usuario usuario) {
         usuario.setPass(passwordEncoder.encode(usuario.getPass()));
 
         Optional<Role> roleOptional = roleRepository.findByNombre("ROLE_USER");
@@ -53,7 +64,9 @@ public class UsuarioServiceImp implements UsuarioService {
 
         usuario.setRoles(roles);
 
-        return repository.save(usuario);
+        return DtoMapperUsuario.getInstance()
+            .setUsuario(repository.save(usuario))
+            .build();
     }
 
     @Override
@@ -64,17 +77,19 @@ public class UsuarioServiceImp implements UsuarioService {
 
     @Override
     @Transactional
-    public Optional<Usuario> update(UsuarioRequest usuario, Long id) {
-        Optional<Usuario> usuarioOptional = findById(id);
+    public Optional<UsuarioDto> update(UsuarioRequest usuario, Long id) {
+        Optional<Usuario> usuarioOptional = repository.findById(id);
         Usuario user = null;
         if (usuarioOptional.isPresent()) {
             Usuario usuarioActualizado = usuarioOptional.orElseThrow();
             usuarioActualizado.setUsuario(usuario.getUsuario());
             usuarioActualizado.setCorreo(usuario.getCorreo());
-            user = save(usuarioActualizado);
+            user = repository.save(usuarioActualizado);
         }
 
-        return Optional.ofNullable(user);
+        return Optional.ofNullable(DtoMapperUsuario.getInstance()
+            .setUsuario(user)
+            .build());
     }
 
 }

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tagi.backend.usuariosapp.backend_usuariosapp.models.dto.UsuarioDto;
 import com.tagi.backend.usuariosapp.backend_usuariosapp.models.entities.Usuario;
 import com.tagi.backend.usuariosapp.backend_usuariosapp.models.request.UsuarioRequest;
 import com.tagi.backend.usuariosapp.backend_usuariosapp.services.UsuarioService;
@@ -34,7 +35,7 @@ public class UsuarioController {
     private UsuarioService service;
 
     @GetMapping
-    public List<Usuario> list() {
+    public List<UsuarioDto> list() {
         return service.findAll();
     }
 
@@ -45,7 +46,7 @@ public class UsuarioController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
-        Optional<Usuario> usuario = service.findById(id);
+        Optional<UsuarioDto> usuario = service.findById(id);
 
         if (usuario.isPresent()) {
             return ResponseEntity.ok(usuario.orElseThrow());
@@ -76,7 +77,7 @@ public class UsuarioController {
             return validacion(result);
         }
         
-        Optional<Usuario> usuarioOptional = service.update(usuario, id);
+        Optional<UsuarioDto> usuarioOptional = service.update(usuario, id);
         
         if (usuarioOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(usuarioOptional.orElseThrow());
@@ -87,7 +88,7 @@ public class UsuarioController {
     
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
-        Optional<Usuario> usuario = service.findById(id);
+        Optional<UsuarioDto> usuario = service.findById(id);
         
         if (usuario.isPresent()) {
             service.remove(id);
