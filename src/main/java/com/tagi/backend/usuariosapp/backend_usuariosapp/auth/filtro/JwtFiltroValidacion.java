@@ -1,14 +1,14 @@
 package com.tagi.backend.usuariosapp.backend_usuariosapp.auth.filtro;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Base64;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.crypto.SecretKey;
 
+import org.springframework.boot.autoconfigure.task.TaskSchedulingProperties.Simple;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tagi.backend.usuariosapp.backend_usuariosapp.auth.SimpleGrantedAuthorityJson;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -62,9 +63,13 @@ public class JwtFiltroValidacion extends BasicAuthenticationFilter{
                 .parseSignedClaims(token)
                 .getPayload();
 
+            Object authoritiesClaims = claims.get("authorities");
             String usuario = claims.getSubject();
-            List<GrantedAuthority> authorities = new ArrayList<>();
-            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+
+            Collection<? extends GrantedAuthority> authorities = Arrays
+                        .asList(new ObjectMapper()
+                        .addMixIn(SimpleGrantedAuthority.class, SimpleGrantedAuthorityJson.class)
+                        .readValue(authoritiesClaims.toString().getBytes(), SimpleGrantedAuthority[].class));
 
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(usuario, null, authorities);
             SecurityContextHolder.getContext().setAuthentication(auth);

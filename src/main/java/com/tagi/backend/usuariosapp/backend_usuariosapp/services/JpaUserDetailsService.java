@@ -1,8 +1,8 @@
 package com.tagi.backend.usuariosapp.backend_usuariosapp.services;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,9 +32,10 @@ public class JpaUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("No se encontro al usuario: " + username);
         } else {
             Usuario usuario = usuarioOptional.orElseThrow();
-            List<GrantedAuthority> authorities = new ArrayList<>();
-
-            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+            List<GrantedAuthority> authorities = usuario.getRoles()
+                    .stream()
+                    .map(r -> new SimpleGrantedAuthority(r.getNombre()))
+                    .collect(Collectors.toList());
 
             return new User(usuario.getUsuario(), 
                     usuario.getPass(), 

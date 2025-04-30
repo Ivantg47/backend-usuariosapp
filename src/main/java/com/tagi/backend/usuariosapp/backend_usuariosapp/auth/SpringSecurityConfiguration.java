@@ -36,6 +36,9 @@ public class SpringSecurityConfiguration {
     SecurityFilterChain filterChain(HttpSecurity http, @Value("${auth.codigo_secreto}") String codigoSecreto) throws Exception {
         return http.authorizeHttpRequests(authz -> authz
                 .requestMatchers(HttpMethod.GET, "/usuarios").permitAll()
+                .requestMatchers(HttpMethod.GET, "/usuarios/{id}").hasAnyRole("USER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/usuarios").hasRole("ADMIN")
+                .requestMatchers("/usuarios/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
             .addFilter(new JwtFiltroAutenticacion(authenticationConfiguration.getAuthenticationManager(), codigoSecreto))
             .addFilter(new JwtFiltroValidacion(authenticationConfiguration.getAuthenticationManager(), codigoSecreto))
