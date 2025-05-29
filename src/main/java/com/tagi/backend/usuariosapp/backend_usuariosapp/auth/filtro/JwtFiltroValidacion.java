@@ -31,11 +31,8 @@ import static com.tagi.backend.usuariosapp.backend_usuariosapp.auth.TokenJwtConf
 
 public class JwtFiltroValidacion extends BasicAuthenticationFilter{
 
-    private final String codigoSecreto;
-
-    public JwtFiltroValidacion(AuthenticationManager authenticationManager, String codigoSecreto) {
+    public JwtFiltroValidacion(AuthenticationManager authenticationManager) {
         super(authenticationManager);
-        this.codigoSecreto = codigoSecreto;
     }
 
     @Override

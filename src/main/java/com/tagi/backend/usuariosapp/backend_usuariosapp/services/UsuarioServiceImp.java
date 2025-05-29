@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tagi.backend.usuariosapp.backend_usuariosapp.models.IUsuario;
 import com.tagi.backend.usuariosapp.backend_usuariosapp.models.dto.UsuarioDto;
 import com.tagi.backend.usuariosapp.backend_usuariosapp.models.dto.mapper.DtoMapperUsuario;
 import com.tagi.backend.usuariosapp.backend_usuariosapp.models.entities.Role;
@@ -55,14 +56,7 @@ public class UsuarioServiceImp implements UsuarioService {
     public UsuarioDto save(Usuario usuario) {
         usuario.setPass(passwordEncoder.encode(usuario.getPass()));
 
-        Optional<Role> roleOptional = roleRepository.findByNombre("ROLE_USER");
-        List<Role> roles = new ArrayList<>();
-
-        if (roleOptional.isPresent()) {
-            roles.add(roleOptional.orElseThrow());
-        }
-
-        usuario.setRoles(roles);
+        usuario.setRoles(getRoles(usuario));
 
         return DtoMapperUsuario.getInstance()
             .setUsuario(repository.save(usuario))
@@ -80,16 +74,31 @@ public class UsuarioServiceImp implements UsuarioService {
     public Optional<UsuarioDto> update(UsuarioRequest usuario, Long id) {
         Optional<Usuario> usuarioOptional = repository.findById(id);
         Usuario user = null;
+        System.out.println("Actualizando usuario con ID: " + id);
         if (usuarioOptional.isPresent()) {
             Usuario usuarioActualizado = usuarioOptional.orElseThrow();
             usuarioActualizado.setUsuario(usuario.getUsuario());
             usuarioActualizado.setCorreo(usuario.getCorreo());
+            usuarioActualizado.setRoles(getRoles(usuario));
             user = repository.save(usuarioActualizado);
         }
 
         return Optional.ofNullable(DtoMapperUsuario.getInstance()
             .setUsuario(user)
             .build());
+    }
+
+    private List<Role> getRoles(IUsuario usuario) {
+        List<Role> roles = new ArrayList<>();
+        Optional<Role> userRole = roleRepository.findByNombre("ROLE_USER");
+        userRole.ifPresent(roles::add);
+
+        if (usuario.isAdmin()) {
+            Optional<Role> adminRole = roleRepository.findByNombre("ROLE_ADMIN");
+            adminRole.ifPresent(roles::add);
+        }
+
+        return roles;
     }
 
 }

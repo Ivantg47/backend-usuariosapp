@@ -2,6 +2,8 @@ package com.tagi.backend.usuariosapp.backend_usuariosapp.models.entities;
 
 import java.util.List;
 
+import com.tagi.backend.usuariosapp.backend_usuariosapp.models.IUsuario;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -19,7 +22,7 @@ import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "usuarios")
-public class Usuario {
+public class Usuario implements IUsuario{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,6 +41,9 @@ public class Usuario {
     @NotBlank
     @Email
     private String correo;
+
+    @Transient
+    private boolean admin;
     
     @ManyToMany
     @JoinTable(name = "usuarios_roles", 
@@ -86,5 +92,13 @@ public class Usuario {
         this.roles = roles;
     }
 
-    
+    @Override
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
+    }
+
 }

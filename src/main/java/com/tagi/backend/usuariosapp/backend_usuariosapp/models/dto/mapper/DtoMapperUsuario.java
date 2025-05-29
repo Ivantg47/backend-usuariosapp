@@ -23,6 +23,8 @@ public class DtoMapperUsuario {
         if (usuario == null) {
             throw new RuntimeException("El usuario no a sido inicializado");
         }
-        return new UsuarioDto(this.usuario.getId(), this.usuario.getUsuario(), this.usuario.getCorreo());
+        boolean isAdmin = usuario.getRoles() != null && usuario.getRoles().stream()
+                .anyMatch(role -> role.getNombre().equals("ROLE_ADMIN"));
+        return new UsuarioDto(this.usuario.getId(), this.usuario.getUsuario(), this.usuario.getCorreo(), isAdmin);
     }
 }

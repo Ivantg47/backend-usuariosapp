@@ -37,10 +37,8 @@ public class JwtFiltroAutenticacion extends UsernamePasswordAuthenticationFilter
     // y establecer la autenticación en el contexto de seguridad de Spring Security.
 
     private AuthenticationManager authenticationManager;
-    private final String codigoSecreto;
     
-    public JwtFiltroAutenticacion(AuthenticationManager authenticationManager, String codigoSecreto) {
-        this.codigoSecreto = codigoSecreto;
+    public JwtFiltroAutenticacion(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
     
@@ -56,7 +54,6 @@ public class JwtFiltroAutenticacion extends UsernamePasswordAuthenticationFilter
             username = usuario.getUsuario();
             password = usuario.getPass();
 
-            logger.debug("Usuario: " + username + ", Pass: " + password);
         } catch (StreamReadException e) {
             e.printStackTrace();
         } catch (DatabindException e) {
@@ -76,7 +73,7 @@ public class JwtFiltroAutenticacion extends UsernamePasswordAuthenticationFilter
             Authentication authResult) throws IOException, ServletException {
 
         String usuario = ((User) authResult.getPrincipal()).getUsername();
-        
+        System.out.println("Usuario autenticado: " + usuario);
         Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
         boolean isAdmin = roles.stream()
                 .anyMatch(role -> role.getAuthority().equals("ROLE_ADMIN"));
